@@ -74,7 +74,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // ---- Called by your player's attack/bullets later ----
+    // ---- Called by player's attack/bullets later ----
     public void TakeDamage(float amount)
     {
         if (CurrentHealth <= 0) return;
