@@ -16,8 +16,13 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector2 moveInput;
 
+    private float facingSign = 1f;
+    private float baseScaleX;
+
     private void Awake()
     {
+
+        baseScaleX = Mathf.Abs(transform.localScale.x);
         rb = GetComponent<Rigidbody>();
         playerInput = GetComponent<PlayerInput>();
 
@@ -93,6 +98,13 @@ public class PlayerMovement : MonoBehaviour
         UpdateFacing(input.x);
     }
 
+    private void LateUpdate()
+    {
+        Vector3 scale = transform.localScale;
+        scale.x = facingSign * baseScaleX;
+        transform.localScale = scale;
+    }
+
     private void UpdateFacing(float horizontalInput)
     {
         if (Mathf.Abs(horizontalInput) < 0.01f)
@@ -103,7 +115,10 @@ public class PlayerMovement : MonoBehaviour
         Vector3 scale = transform.localScale;
         scale.x = Mathf.Sign(horizontalInput) * Mathf.Abs(scale.x);
         transform.localScale = scale;
+        facingSign = Mathf.Sign(horizontalInput);
     }
+
+
 
     private void OnMovePerformed(InputAction.CallbackContext context)
     {
