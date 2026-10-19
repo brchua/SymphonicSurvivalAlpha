@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// Put this on a World Space Canvas that is a child of the enemy.
+// Put on a World Space Canvas (child of the enemy.
 public class EnemyHealthBar : MonoBehaviour
 {
     [SerializeField] private Image fillImage; // Image Type = Filled, Fill Method = Horizontal
@@ -27,7 +27,8 @@ public class EnemyHealthBar : MonoBehaviour
 
     private void LateUpdate()
     {
-        // keep the bar upright even if the enemy rotates
-        transform.rotation = Quaternion.identity;
+        // always face the camera (works for top-down and angled views)
+        if (Camera.main != null)
+            transform.rotation = Camera.main.transform.rotation;
     }
 }
