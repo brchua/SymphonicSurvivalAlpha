@@ -1,132 +1,92 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(PlayerInput))]
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Movement")]
-    [SerializeField] private float moveSpeed = 10f;
+    [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float maxUpwardSpeed = 2f;
 
     private Rigidbody rb;
-        private PlayerInput playerInput;
-    private InputAction moveAction;
-    private Camera mainCamera;
-
     private Vector2 moveInput;
 
-    private float facingSign = 1f;
-    private float baseScaleX;
+    // Flute speed boost
+    private float speedMultiplier = 1f;
+    private Coroutine boostRoutine;
+    private float CurrentSpeed => moveSpeed * speedMultiplier;
 
-    private void Awake()
+    void Start()
     {
-
-        baseScaleX = Mathf.Abs(transform.localScale.x);
         rb = GetComponent<Rigidbody>();
-        playerInput = GetComponent<PlayerInput>();
-
         rb.constraints = RigidbodyConstraints.FreezeRotation;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
-
-        moveAction = playerInput.actions.FindAction("Move", false);
-
-        if (moveAction == null)
-        {
-            Debug.LogError(
-                "PlayerMovement could not find an input action named 'Move'. " +
-                "Check the PlayerInput actions asset and action name.",
-                this);
-        }
     }
 
-    private void OnEnable()
+    void Update()
     {
-        moveInput = Vector2.zero;
-
-        if (moveAction == null)
+        // Convert input to world-space using camera Y rotation so left/right match what you see on screen
+        Vector3 desired;
+        if (Camera.main != null)
         {
-            return;
+            // rotate input by camera Y only
+            Quaternion camYaw = Quaternion.Euler(0f, Camera.main.transform.eulerAngles.y, 0f);
+            Vector3 input3 = new Vector3(moveInput.x, 0f, moveInput.y);
+            Vector3 worldMove = camYaw * input3;
+            desired = new Vector3(worldMove.x * CurrentSpeed, rb.linearVelocity.y, worldMove.z * CurrentSpeed);
+
+            // If player is a 2D sprite (quad), flipping its X scale makes it face left/right visually
+            if (worldMove.sqrMagnitude > 0.001f)
+            {
+                Vector3 ls = transform.localScale;
+                ls.x = Mathf.Sign(worldMove.x != 0f ? worldMove.x : Mathf.Sign(ls.x)) * Mathf.Abs(ls.x);
+                transform.localScale = ls;
+            }
+        }
+        else
+        {
+            // fallback to world axes
+            desired = new Vector3(moveInput.x * CurrentSpeed, rb.linearVelocity.y, moveInput.y * CurrentSpeed);
         }
 
-        moveAction.performed += OnMovePerformed;
-        moveAction.canceled += OnMoveCanceled;
-        moveAction.Enable();
+        // keep upward speed clamped
+        float clampedY = Mathf.Min(rb.linearVelocity.y, maxUpwardSpeed);
+        rb.linearVelocity = new Vector3(desired.x, clampedY, desired.z);
     }
 
-    private void OnDisable()
-    {
-        if (moveAction != null)
-        {
-            moveAction.performed -= OnMovePerformed;
-            moveAction.canceled -= OnMoveCanceled;
-            moveAction.Disable();
-        }
-
-        moveInput = Vector2.zero;
-    }
-
-    private void FixedUpdate()
-    {
-        if (mainCamera == null)
-        {
-            mainCamera = Camera.main;
-        }
-
-        Vector2 input = Vector2.ClampMagnitude(moveInput, 1f);
-        Vector3 inputDirection = new Vector3(input.x, 0f, input.y);
-        Vector3 worldDirection = inputDirection;
-
-        if (mainCamera != null)
-        {
-            Quaternion cameraRotation = Quaternion.Euler(
-                0f,
-                mainCamera.transform.eulerAngles.y,
-                0f);
-
-            worldDirection = cameraRotation * inputDirection;
-        }
-
-        Vector3 velocity = rb.linearVelocity;
-        velocity.x = worldDirection.x * moveSpeed;
-        velocity.y = Mathf.Min(velocity.y, maxUpwardSpeed);
-        velocity.z = worldDirection.z * moveSpeed;
-
-        rb.linearVelocity = velocity;
-
-        UpdateFacing(input.x);
-    }
-
-    private void LateUpdate()
-    {
-        Vector3 scale = transform.localScale;
-        scale.x = facingSign * baseScaleX;
-        transform.localScale = scale;
-    }
-
-    private void UpdateFacing(float horizontalInput)
-    {
-        if (Mathf.Abs(horizontalInput) < 0.01f)
-        {
-            return;
-        }
-
-        Vector3 scale = transform.localScale;
-        scale.x = Mathf.Sign(horizontalInput) * Mathf.Abs(scale.x);
-        transform.localScale = scale;
-        facingSign = Mathf.Sign(horizontalInput);
-    }
-
-
-
-    private void OnMovePerformed(InputAction.CallbackContext context)
+    public void Move(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
     }
 
-    private void OnMoveCanceled(InputAction.CallbackContext context)
+    // Called by the flute combo. Using it again while a boost is active just restarts the timer (no stacking).
+    public void ApplySpeedBoost(float multiplier, float duration)
     {
-        moveInput = Vector2.zero;
+        if (boostRoutine != null) StopCoroutine(boostRoutine);
+        boostRoutine = StartCoroutine(SpeedBoostRoutine(multiplier, duration));
+    }
+
+    private IEnumerator SpeedBoostRoutine(float multiplier, float duration)
+    {
+        speedMultiplier = multiplier;
+        yield return new WaitForSeconds(duration);
+        speedMultiplier = 1f;
+        boostRoutine = null;
+    }
+
+    void OnCollisionEnter(Collision c)
+    {
+        if (c.gameObject.name == "Ground") return;
+        var contact = c.GetContact(0);
+        Debug.Log($"HIT {c.gameObject.name}  pos.y={rb.position.y:F2}  vel.y={rb.linearVelocity.y:F02}  " +
+                  $"impulse={c.impulse}  normal={contact.normal}  separation={contact.separation:F3}");
+    }
+
+    void OnCollisionStay(Collision c)
+    {
+        if (c.gameObject.name == "Ground") return;
+        if (rb.linearVelocity.y > 2f)
+            Debug.Log($"LAUNCH vs {c.gameObject.name}  vel.y={rb.linearVelocity.y:F2}  impulse={c.impulse}  sep={c.GetContact(0).separation:F3}");
     }
 }
