@@ -15,6 +15,7 @@ public class Enemy : MonoBehaviour
     public float MoveSpeed { get; private set; }
 
     public event Action<float, float> OnHealthChanged; // current, max
+    public event Action<Enemy> OnDied;                 // the wave controller listens to this
 
     private Rigidbody rb;
     private Transform target;
@@ -23,6 +24,7 @@ public class Enemy : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.useGravity = false;
+        rb.isKinematic = false; // a kinematic body ignores velocity, so it would never move
         rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
 
         MaxHealth = baseMaxHealth;
@@ -32,13 +34,31 @@ public class Enemy : MonoBehaviour
 
     private void Start()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null) target = player.transform;
-        else Debug.LogWarning("Enemy: no object tagged 'Player' found.");
+        FindTarget();
     }
 
-    /// <summary>
-    /// Speed and HP modifier. Call this right after spawning, e.g. Initialize(1.2f, 2f)
+    private void FindTarget()
+    {
+        // 1"Player" tag
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            target = player.transform;
+            return;
+        }
+
+        // 2) find the object that has PlayerMovement (works even if the tag is missing)
+        PlayerMovement pm = FindFirstObjectByType<PlayerMovement>();
+        if (pm != null)
+        {
+            target = pm.transform;
+            Debug.LogWarning("Enemy: no object tagged 'Player', so I used the PlayerMovement object. " +
+                             "Set the Player's Tag to 'Player' to fix this warning.");
+        }
+    }
+
+   
+    /// Speed and HP modifier. Call after spawning, e.g. Initialize(1.2f, 2f)
     /// = 20% faster and double HP. A spawner can scale this as waves progress.
     /// </summary>
     public void Initialize(float speedMultiplier, float hpMultiplier)
@@ -51,7 +71,11 @@ public class Enemy : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (target == null) return;
+        if (target == null)
+        {
+            FindTarget(); // keep trying, in case the player isn't ready yet
+            return;
+        }
 
         Vector3 direction = target.position - rb.position;
         direction.y = 0f; // stay on the X-Z plane
@@ -74,7 +98,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // ---- Called by player's attack/bullets later ----
+    // ---- Called by your player's attack/bullets later ----
     public void TakeDamage(float amount)
     {
         if (CurrentHealth <= 0) return;
@@ -91,6 +115,13 @@ public class Enemy : MonoBehaviour
             ScoreManager.Instance.AddScore(scoreValue);
 
         Destroy(gameObject);
+    }
+
+    // Fires however the enemy is removed (killed, or destroyed by something else),
+    // so the wave controller's enemy count can never get stuck.
+    private void OnDestroy()
+    {
+        OnDied?.Invoke(this);
     }
 
     // Right-click the component header in the Inspector (Play mode) to test
