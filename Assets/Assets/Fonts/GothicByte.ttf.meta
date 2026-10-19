@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: da0be256aeee30e4f8c1daf28b84fdf6
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - GothicByte
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 0
+  subsetRecipes: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

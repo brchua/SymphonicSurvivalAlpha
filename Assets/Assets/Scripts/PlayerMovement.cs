@@ -2,70 +2,131 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 5f;
+    [Header("Movement")]
+    [SerializeField] private float moveSpeed = 10f;
     [SerializeField] private float maxUpwardSpeed = 2f;
 
     private Rigidbody rb;
+        private PlayerInput playerInput;
+    private InputAction moveAction;
+    private Camera mainCamera;
+
     private Vector2 moveInput;
 
-    void Start()
+    private float facingSign = 1f;
+    private float baseScaleX;
+
+    private void Awake()
     {
+
+        baseScaleX = Mathf.Abs(transform.localScale.x);
         rb = GetComponent<Rigidbody>();
+        playerInput = GetComponent<PlayerInput>();
+
         rb.constraints = RigidbodyConstraints.FreezeRotation;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
+        moveAction = playerInput.actions.FindAction("Move", false);
+
+        if (moveAction == null)
+        {
+            Debug.LogError(
+                "PlayerMovement could not find an input action named 'Move'. " +
+                "Check the PlayerInput actions asset and action name.",
+                this);
+        }
     }
 
-    void Update()
+    private void OnEnable()
     {
-        // Convert input to world-space using camera Y rotation so left/right match what you see on screen
-        Vector3 desired;
-        if (Camera.main != null)
-        {
-            // rotate input by camera Y only
-            Quaternion camYaw = Quaternion.Euler(0f, Camera.main.transform.eulerAngles.y, 0f);
-            Vector3 input3 = new Vector3(moveInput.x, 0f, moveInput.y);
-            Vector3 worldMove = camYaw * input3;
-            desired = new Vector3(worldMove.x * moveSpeed, rb.linearVelocity.y, worldMove.z * moveSpeed);
+        moveInput = Vector2.zero;
 
-            // If player is a 2D sprite (quad), flipping its X scale makes it face left/right visually
-            if (worldMove.sqrMagnitude > 0.001f)
-            {
-                Vector3 ls = transform.localScale;
-                ls.x = Mathf.Sign(worldMove.x != 0f ? worldMove.x : Mathf.Sign(ls.x)) * Mathf.Abs(ls.x);
-                transform.localScale = ls;
-            }
-        }
-        else
+        if (moveAction == null)
         {
-            // fallback to world axes
-            desired = new Vector3(moveInput.x * moveSpeed, rb.linearVelocity.y, moveInput.y * moveSpeed);
+            return;
         }
 
-        // keep upward speed clamped
-        float clampedY = Mathf.Min(rb.linearVelocity.y, maxUpwardSpeed);
-        rb.linearVelocity = new Vector3(desired.x, clampedY, desired.z);
+        moveAction.performed += OnMovePerformed;
+        moveAction.canceled += OnMoveCanceled;
+        moveAction.Enable();
     }
 
-    public void Move(InputAction.CallbackContext context)
+    private void OnDisable()
+    {
+        if (moveAction != null)
+        {
+            moveAction.performed -= OnMovePerformed;
+            moveAction.canceled -= OnMoveCanceled;
+            moveAction.Disable();
+        }
+
+        moveInput = Vector2.zero;
+    }
+
+    private void FixedUpdate()
+    {
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+        }
+
+        Vector2 input = Vector2.ClampMagnitude(moveInput, 1f);
+        Vector3 inputDirection = new Vector3(input.x, 0f, input.y);
+        Vector3 worldDirection = inputDirection;
+
+        if (mainCamera != null)
+        {
+            Quaternion cameraRotation = Quaternion.Euler(
+                0f,
+                mainCamera.transform.eulerAngles.y,
+                0f);
+
+            worldDirection = cameraRotation * inputDirection;
+        }
+
+        Vector3 velocity = rb.linearVelocity;
+        velocity.x = worldDirection.x * moveSpeed;
+        velocity.y = Mathf.Min(velocity.y, maxUpwardSpeed);
+        velocity.z = worldDirection.z * moveSpeed;
+
+        rb.linearVelocity = velocity;
+
+        UpdateFacing(input.x);
+    }
+
+    private void LateUpdate()
+    {
+        Vector3 scale = transform.localScale;
+        scale.x = facingSign * baseScaleX;
+        transform.localScale = scale;
+    }
+
+    private void UpdateFacing(float horizontalInput)
+    {
+        if (Mathf.Abs(horizontalInput) < 0.01f)
+        {
+            return;
+        }
+
+        Vector3 scale = transform.localScale;
+        scale.x = Mathf.Sign(horizontalInput) * Mathf.Abs(scale.x);
+        transform.localScale = scale;
+        facingSign = Mathf.Sign(horizontalInput);
+    }
+
+
+
+    private void OnMovePerformed(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
     }
 
-    void OnCollisionEnter(Collision c)
+    private void OnMoveCanceled(InputAction.CallbackContext context)
     {
-        if (c.gameObject.name == "Ground") return;
-        var contact = c.GetContact(0);
-        Debug.Log($"HIT {c.gameObject.name}  pos.y={rb.position.y:F2}  vel.y={rb.linearVelocity.y:F02}  " +
-                  $"impulse={c.impulse}  normal={contact.normal}  separation={contact.separation:F3}");
-    }
-
-    void OnCollisionStay(Collision c)
-    {
-        if (c.gameObject.name == "Ground") return;
-        if (rb.linearVelocity.y > 2f)
-            Debug.Log($"LAUNCH vs {c.gameObject.name}  vel.y={rb.linearVelocity.y:F2}  impulse={c.impulse}  sep={c.GetContact(0).separation:F3}");
+        moveInput = Vector2.zero;
     }
 }

@@ -43,7 +43,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -83,7 +83,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -111,10 +111,10 @@ TextureImporter:
       name: Main_Char_Wep_0
       rect:
         serializedVersion: 2
-        x: 4
-        y: 187
-        width: 132
-        height: 110
+        x: 19
+        y: 234
+        width: 37
+        height: 37
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -138,7 +138,7 @@ TextureImporter:
         width: 28
         height: 29
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -160,7 +160,7 @@ TextureImporter:
         width: 27
         height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -173,11 +173,121 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Main_Char_Wep_3
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 234
+        width: 38
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4af0f400fe27a6347a13513130dc9502
+      internalID: 1830793339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Main_Char_Wep_4
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 233
+        width: 32
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb30cf351b4254041b16488dc55705f4
+      internalID: 1028557383
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Main_Char_Wep_5
+      rect:
+        serializedVersion: 2
+        x: 20
+        y: 194
+        width: 36
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f4da336378b0204cab7d8128dc728f3
+      internalID: 160854019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Main_Char_Wep_6
+      rect:
+        serializedVersion: 2
+        x: 59
+        y: 195
+        width: 36
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 495b6d8ea6520224694ae481c4df8cc9
+      internalID: -38830132
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Main_Char_Wep_7
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 196
+        width: 32
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6496415e97e9be04ea2354fbced9837a
+      internalID: 2120696333
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 3847ec011bdddea419927aee41428f4e
     internalID: 0
     vertices: []
     indices: 
@@ -190,6 +300,11 @@ TextureImporter:
       Main_Char_Wep_0: -2983434423957100759
       Main_Char_Wep_1: 5543884986872184812
       Main_Char_Wep_2: 5861734756688965297
+      Main_Char_Wep_3: 1830793339
+      Main_Char_Wep_4: 1028557383
+      Main_Char_Wep_5: 160854019
+      Main_Char_Wep_6: -38830132
+      Main_Char_Wep_7: 2120696333
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

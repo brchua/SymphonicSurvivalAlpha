@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 2282376771191672791}
   - component: {fileID: 5028770132888323770}
   - component: {fileID: 3007768291538537092}
-  - component: {fileID: 5488447738659205066}
   - component: {fileID: 7169881646025518336}
   m_Layer: 0
   m_Name: Player
@@ -87,7 +86,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 9056389252067509911, guid: 29417da7d89a8744a9c3cbf58a74c10a, type: 3}
+  m_Sprite: {fileID: -7403719521845238510, guid: 8a5d1eea5dc375949b4543e7b8b57848, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -255,20 +254,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &5488447738659205066
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6937780054773175006}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80f9518eec520774ba6a0f9d21646b25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  moveSpeed: 5
-  maxUpwardSpeed: 2
 --- !u!136 &7169881646025518336
 CapsuleCollider:
   m_ObjectHideFlags: 0

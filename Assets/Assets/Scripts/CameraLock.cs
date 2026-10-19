@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,12 +16,11 @@ public class CameraLock : MonoBehaviour
     [SerializeField] private float zoomSmoothing = 10f;
     [SerializeField] private float[] rotAngles = new float[] { 45f, 135f, 225f, 315f };
 
-    [SerializeField] private bool rotatePlayerWithCamera = true;
+    [SerializeField] private bool rotatePlayerWithCamera = false;
 
     private float targetZoom;
     private Camera cam;
     private Vector3 velocity;
-    private Quaternion playerRotOffset = Quaternion.identity;
 
     private int rotationIndex;
     private float currentYaw;
@@ -46,7 +44,6 @@ public class CameraLock : MonoBehaviour
         if (target != null)
         {
             Quaternion startView = Quaternion.Euler(pitch, currentYaw, 0f);
-            playerRotOffset = Quaternion.Inverse(startView) * target.rotation;
 
             // start exactly in place instead of easing in from the scene position
             transform.position = target.position - startView * Vector3.forward * distance;
@@ -91,7 +88,10 @@ public class CameraLock : MonoBehaviour
 
         if (rotatePlayerWithCamera)
         {
-            target.rotation = transform.rotation * playerRotOffset;
+            target.rotation = Quaternion.Euler(
+                0f,
+                currentYaw,
+                0f);
         }
 
         if (cam != null)
