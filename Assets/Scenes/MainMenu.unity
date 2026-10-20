@@ -408,7 +408,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 578.49994, y: -240.77298}
+  m_AnchoredPosition: {x: -514.50006, y: -240.77298}
   m_SizeDelta: {x: 161.5, y: 50.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &123834951
@@ -1207,7 +1207,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 12.5, y: 21.22705}
+  m_AnchoredPosition: {x: 12.5, y: 64}
   m_SizeDelta: {x: 79.536255, y: 134.21094}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &441292147
@@ -1230,7 +1230,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6346217704806960763, guid: 545b98924cbe01149a0a67ab31a2c511, type: 3}
+  m_Sprite: {fileID: 3660771042342436007, guid: b091df8ebc70de947b992e88d5f301d6, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1344,7 +1344,7 @@ MonoBehaviour:
   m_text: 'Amber - Lead Coder
 
 
-    Brendan Chua - Project Lead, Jack Of All Trades
+    Brendan - Project Lead, Jack Of All Trades
 
 
     Demi - Lead Artist
@@ -2334,7 +2334,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -712, y: -452}
+  m_AnchoredPosition: {x: 598, y: -483}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &924393628
@@ -2804,7 +2804,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 1498, y: 599}
+  m_AnchoredPosition: {x: 405, y: 599}
   m_SizeDelta: {x: 161.5, y: 50.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1407508597
@@ -3512,7 +3512,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 578.49994, y: -61.77298}
+  m_AnchoredPosition: {x: -514.50006, y: -61.77298}
   m_SizeDelta: {x: 161.5, y: 50.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1510022325
@@ -3967,7 +3967,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 597, y: -421.77298}
+  m_AnchoredPosition: {x: -519, y: -421.77298}
   m_SizeDelta: {x: 161.5, y: 50.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1580401266

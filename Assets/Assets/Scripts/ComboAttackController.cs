@@ -17,6 +17,7 @@ public class ComboAttackController : MonoBehaviour
     }
 
     [SerializeField] private Animator animator;
+    [SerializeField] private BeatBar beatBar;   // metronome check. Leave empty to play without the beat bar.
     [SerializeField] private float sequenceTimeLimit = 5f;
     [SerializeField] private AudioSource sfxSourceGuitar;
     [SerializeField] private AudioSource sfxSourceFlute;
@@ -101,8 +102,16 @@ public class ComboAttackController : MonoBehaviour
 
         foreach (var key in comboKeys)
         {
-            if (keyboard[key].wasPressedThisFrame && IsInputAllowed())
-                HandleKey(key);
+            if (!keyboard[key].wasPressedThisFrame) continue;
+
+            if (!IsInputAllowed())
+            {
+                // missed the beat -> the container (buffer) clears
+                FailSequence("Off beat");
+                continue;
+            }
+
+            HandleKey(key);
         }
     }
 
@@ -278,8 +287,16 @@ public class ComboAttackController : MonoBehaviour
         buffer.Clear();
     }
 
-    // Metronome hook: later, return false when the press is off-beat
-    protected virtual bool IsInputAllowed() => true;
+    // Metronome check: a key only counts if it is pressed on the beat.
+    // Green = success, red = fail (the BeatBar flashes its rectangles).
+    protected virtual bool IsInputAllowed()
+    {
+        if (beatBar == null) return true; // no beat bar assigned = no timing check (testing mode)
+
+        bool onBeat = beatBar.IsOnBeat();
+        beatBar.ShowResult(onBeat);
+        return onBeat;
+    }
 
     private void PlayLimited(AudioSource source, AudioClip clip)
     {
