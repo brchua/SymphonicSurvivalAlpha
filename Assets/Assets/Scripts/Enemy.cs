@@ -9,6 +9,8 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float baseMoveSpeed = 3f;
     [SerializeField] private int contactDamage = 10;
     [SerializeField] private int scoreValue = 10;
+    [SerializeField] private Transform visual; // the sprite child; leave empty to rotate the root
+    private Camera cam;
 
     public float MaxHealth { get; private set; }
     public float CurrentHealth { get; private set; }
@@ -31,6 +33,15 @@ public class Enemy : MonoBehaviour
         MaxHealth = baseMaxHealth;
         CurrentHealth = MaxHealth;
         MoveSpeed = baseMoveSpeed;
+    }
+
+    private void LateUpdate()
+    {
+        if (cam == null) cam = Camera.main;
+        if (cam == null) return;
+
+        Transform t = visual != null ? visual : transform;
+        t.rotation = cam.transform.rotation; // sprite always parallel to the camera
     }
 
     private void Start()

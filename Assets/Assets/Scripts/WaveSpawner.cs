@@ -1,6 +1,6 @@
 using System.Collections;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 // Wave event controller.
 // Spawn locations are other empty
@@ -19,8 +19,9 @@ public class WaveSpawner : MonoBehaviour
     [SerializeField] private int maxEnemiesPerWave = 100;  // safety cap, doubling gets huge fast
     [SerializeField] private float startDelay = 2f;        // pause before wave 1
     [SerializeField] private float timeBetweenWaves = 3f;  // pause after a wave is cleared
-    [SerializeField] private float spawnInterval = 0.3f;   // gap between enemies in a wave
-    [SerializeField] private float spawnJitter = 1f;       // random offset around a spawn point
+    [SerializeField] private float spawnInterval = 0.3f;
+    [SerializeField] private float spawnJitter = 1f;
+    [SerializeField] private float spawnHeightOffset = 0.5f;
 
     [Header("Scaling (applied once per tier)")]
     [SerializeField] private float speedIncreasePerTier = 0.20f; // +20% of the CURRENT speed (compounds)
@@ -35,6 +36,7 @@ public class WaveSpawner : MonoBehaviour
 
     private int aliveCount;
     private PlayerHealth playerHealth;
+    private float groundHeight;
 
     private void Start()
     {
@@ -45,7 +47,7 @@ public class WaveSpawner : MonoBehaviour
         }
 
         // stop spawning when the player dies
-        playerHealth = FindFirstObjectByType<PlayerHealth>();
+        playerHealth = FindAnyObjectByType<PlayerHealth>();
         if (playerHealth != null) playerHealth.OnDied += HandlePlayerDied;
 
         UpdateUI();
@@ -89,19 +91,48 @@ public class WaveSpawner : MonoBehaviour
     {
         int tier = GetTier(wave);
         int count = GetEnemyCount(tier);
-        float speedMult = Mathf.Pow(1f + speedIncreasePerTier, tier); // x1.2 each tier, compounding
-        float hpMult = 1f + hpIncreasePerTier * tier;                 // +0.25 each tier
+
+        float speedMult =
+            Mathf.Pow(1f + speedIncreasePerTier, tier);
+
+        float hpMult =
+            1f + hpIncreasePerTier * tier;
 
         for (int i = 0; i < count; i++)
         {
-            Enemy enemy = Instantiate(enemyPrefab, GetSpawnPosition(), Quaternion.identity);
-            enemy.Initialize(speedMult, hpMult);
+            Transform spawnPoint = GetSpawnPoint();
 
-            aliveCount++;
+            Vector2 randomOffset =
+                Random.insideUnitCircle * spawnJitter;
+
+            Vector3 spawnPosition =
+                spawnPoint.position +
+                new Vector3(randomOffset.x, 0f, randomOffset.y);
+
+            Enemy enemy = Instantiate(
+                enemyPrefab,
+                spawnPosition,
+                Quaternion.identity);
+
+            PlaceEnemyOnGround(enemy, spawnPoint.position.y);
+
+            enemy.Initialize(speedMult, hpMult);
             enemy.OnDied += HandleEnemyDied;
+            aliveCount++;
 
             yield return new WaitForSeconds(spawnInterval);
         }
+    }
+
+    private Transform GetSpawnPoint()
+    {
+        if (spawnPoints != null && spawnPoints.Length > 0)
+        {
+            return spawnPoints[
+                Random.Range(0, spawnPoints.Length)];
+        }
+
+        return transform;
     }
 
     private void HandleEnemyDied(Enemy enemy)
@@ -123,16 +154,6 @@ public class WaveSpawner : MonoBehaviour
         return Mathf.Min(Mathf.RoundToInt(count), maxEnemiesPerWave);
     }
 
-    private Vector3 GetSpawnPosition()
-    {
-        Transform point = transform;
-        if (spawnPoints != null && spawnPoints.Length > 0)
-            point = spawnPoints[Random.Range(0, spawnPoints.Length)];
-
-        Vector2 jitter = Random.insideUnitCircle * spawnJitter;
-        return point.position + new Vector3(jitter.x, 0f, jitter.y); // jitter on the X-Z plane
-    }
-
     private void UpdateUI()
     {
         if (waveText != null)
@@ -152,5 +173,41 @@ public class WaveSpawner : MonoBehaviour
         {
             Gizmos.DrawWireSphere(transform.position, Mathf.Max(spawnJitter, 0.3f));
         }
+    }
+
+    private void PlaceEnemyOnGround(Enemy enemy, float yPos)
+    {
+        Collider[] colliders =
+            enemy.GetComponentsInChildren<Collider>();
+
+        float lowestPoint = float.PositiveInfinity;
+
+        foreach (Collider enemyCollider in colliders)
+        {
+            if (enemyCollider.isTrigger)
+            {
+                continue;
+            }
+
+            lowestPoint = Mathf.Min(
+                lowestPoint,
+                enemyCollider.bounds.min.y);
+        }
+
+        if (float.IsPositiveInfinity(lowestPoint))
+        {
+            Debug.LogWarning(
+                $"Enemy '{enemy.name}' has no non-trigger collider.",
+                enemy);
+
+            return;
+        }
+
+        float heightCorrection =
+            groundHeight - lowestPoint + 0.01f;
+
+        Vector3 position = enemy.transform.position;
+        position.y += heightCorrection;
+        enemy.transform.position = position;
     }
 }
