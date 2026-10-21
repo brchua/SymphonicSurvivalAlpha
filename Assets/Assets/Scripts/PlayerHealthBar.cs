@@ -10,7 +10,7 @@ public class PlayerHealthBar : MonoBehaviour
     private void Start()
     {
         if (playerHealth == null)
-            playerHealth = FindFirstObjectByType<PlayerHealth>();
+            playerHealth = FindAnyObjectByType<PlayerHealth>();
 
         if (playerHealth == null)
         {
