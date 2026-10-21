@@ -22,13 +22,12 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
-
         if (CurrentHealth <= 0) return;
         if (Time.time < lastHitTime + invincibilityTime) return;
 
         lastHitTime = Time.time;
         CurrentHealth = Mathf.Max(0, CurrentHealth - amount);
-        Debug.Log($"Player HP: {CurrentHealth}");   // <-- add this
+        Debug.Log($"Player HP: {CurrentHealth}/{maxHealth}");   // TEMPORARY debug, delete later
         OnHealthChanged?.Invoke(CurrentHealth, maxHealth);
 
         if (CurrentHealth == 0)

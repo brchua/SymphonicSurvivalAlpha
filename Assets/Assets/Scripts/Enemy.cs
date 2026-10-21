@@ -19,6 +19,7 @@ public class Enemy : MonoBehaviour
 
     private Rigidbody rb;
     private Transform target;
+    private bool heightAligned;
 
     private void Awake()
     {
@@ -39,7 +40,7 @@ public class Enemy : MonoBehaviour
 
     private void FindTarget()
     {
-        // 1"Player" tag
+        // 1) try the "Player" tag
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
@@ -47,7 +48,7 @@ public class Enemy : MonoBehaviour
             return;
         }
 
-        // 2) find the object that has PlayerMovement (works even if the tag is missing)
+        // 2) fallback: find the object that has PlayerMovement (works even if the tag is missing)
         PlayerMovement pm = FindFirstObjectByType<PlayerMovement>();
         if (pm != null)
         {
@@ -57,8 +58,8 @@ public class Enemy : MonoBehaviour
         }
     }
 
-   
-    /// Speed and HP modifier. Call after spawning, e.g. Initialize(1.2f, 2f)
+    /// <summary>
+    /// Speed and HP modifier. Call this right after spawning, e.g. Initialize(1.2f, 2f)
     /// = 20% faster and double HP. A spawner can scale this as waves progress.
     /// </summary>
     public void Initialize(float speedMultiplier, float hpMultiplier)
@@ -77,6 +78,17 @@ public class Enemy : MonoBehaviour
             return;
         }
 
+        // Enemy height is frozen, so on the first frame match the player's height once.
+        // Otherwise an enemy spawned a bit too high or low slides past the player without touching.
+        if (!heightAligned)
+        {
+            Vector3 aligned = rb.position;
+            aligned.y = target.position.y;
+            rb.position = aligned;
+            transform.position = aligned;
+            heightAligned = true;
+        }
+
         Vector3 direction = target.position - rb.position;
         direction.y = 0f; // stay on the X-Z plane
 
@@ -90,12 +102,30 @@ public class Enemy : MonoBehaviour
     }
 
     // ---- Collision check: touching the enemy hurts the player ----
+    private void OnCollisionEnter(Collision collision)
+    {
+        // TEMPORARY debug: tells you what the enemy touched. Delete once the HP bar works.
+        bool found = collision.collider.GetComponentInParent<PlayerHealth>() != null;
+        Debug.Log($"Enemy touched '{collision.collider.name}'. Has PlayerHealth: {found}");
+    }
+
     private void OnCollisionStay(Collision collision)
     {
-        if (collision.gameObject.TryGetComponent(out PlayerHealth playerHealth))
-        {
+        HurtPlayer(collision.collider);
+    }
+
+    // Also works if the enemy's collider has "Is Trigger" checked
+    private void OnTriggerStay(Collider other)
+    {
+        HurtPlayer(other);
+    }
+
+    private void HurtPlayer(Collider other)
+    {
+        // GetComponentInParent also finds PlayerHealth when the collider is on a child object
+        PlayerHealth playerHealth = other.GetComponentInParent<PlayerHealth>();
+        if (playerHealth != null)
             playerHealth.TakeDamage(contactDamage); // PlayerHealth handles the cooldown
-        }
     }
 
     // ---- Called by your player's attack/bullets later ----
